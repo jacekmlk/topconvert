@@ -11,22 +11,28 @@ Read pockettopo txt export and write survex file
 
 int main(int argc, char *argv[])
 {
+    //Open file -> location == argc
     FILE *topfile = fopen("test.txt", "r");
     if (topfile == NULL)
     {
         printf("ERROR!");
         return 1;
     }
-
-    FILE *srvfile = fopen("test.txt", "r");
+    //Open svx file to write
+    FILE *srvfile = fopen("test.txt", "w");
     if (srvfile == NULL)
     {
         printf("ERROR!");
         return 1;
     }
 
-    //Open file -> location == argc
-    //Open svx file to write
+    printf("Check!\n");
+
+
+
+
+
+
 
     //Write header
     //Copy first line to file
