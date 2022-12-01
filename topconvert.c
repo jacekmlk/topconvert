@@ -19,14 +19,19 @@ int main(int argc, char *argv[])
         return 1;
     }
     //Open svx file to write
-    FILE *srvfile = fopen("test.txt", "w");
-    if (srvfile == NULL)
+    FILE *svxfile = fopen("close.txt", "w");
+    if (svxfile == NULL)
     {
         printf("ERROR!");
         return 1;
     }
 
-    printf("Check!\n");
+    char c;
+
+    while(fread(&c, sizeof(char), 1, topfile))
+    {
+        fwrite(&c, sizeof(char), 1, svxfile);
+    }
 
 
 
@@ -58,7 +63,7 @@ int main(int argc, char *argv[])
 
     //Close opened file and svx file
     fclose(topfile);
-    fclose(srvfile);
+    fclose(svxfile);
 
 
 
