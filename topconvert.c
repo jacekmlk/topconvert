@@ -35,17 +35,23 @@ int main(int argc, char *argv[])
         printf("ERROR!");
         return 1;
     }
-
+    
+    // Read and write header
     char line[1024];
     for(int i = 0; i < 5; i++)
     {
-        fgets(line, 1024, topfile);
-        fputs(line, svxfile);
+        if(fgets(line, 1024, topfile) != NULL)
+        {
+            fputs(line, svxfile);
+        }
+        else 
+        {
+            return 1;
+        }
     }
 
-    for(int i = 0; i < 5; i++)
+    while(fgets(line, 1024, topfile) != NULL)
     {
-        fgets(line, 1024, topfile);
         fputs(line, svxfile);
     }
 
