@@ -5,9 +5,9 @@ Read pockettopo txt export and write survex file
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-#define _GNU_SOURCE
 #include <string.h>
+#include <stdbool.h>
+
 
 typedef struct shot
 {
@@ -17,7 +17,7 @@ typedef struct shot
     char compass[9];
     char clino[9];
     char comment[257];
-}shot;
+} shot;
 
 int main(int argc, char *argv[])
 {
@@ -35,21 +35,22 @@ int main(int argc, char *argv[])
         printf("ERROR!");
         return 1;
     }
-    
+
+    char line[1024]; // temporary line buffer
+
     // Read and write header
-    char line[1024];
-    for(int i = 0; i < 5; i++)
+    int d1;
+    int d2;
+
+    while(fgets(line, 1024, topfile) != NULL && !(d1 == 1 && d2 == 1))
     {
-        if(fgets(line, 1024, topfile) != NULL)
-        {
-            fputs(line, svxfile);
-        }
-        else 
-        {
-            return 1;
-        }
+        d1 = d2;
+        d2 = strlen(line);
+
+        fputs(line, svxfile);
     }
 
+    
     while(fgets(line, 1024, topfile) != NULL)
     {
         fputs(line, svxfile);
@@ -57,20 +58,6 @@ int main(int argc, char *argv[])
 
 
 
-
-
-    //Write header
-    //Copy first line to file
-
-    //RM empty line
-
-    //Copy third line to file
-
-    //RM empty line
-
-    //RM empty line
-
-    //Read first line and write into svx file
 
     //Check if splay
 
@@ -84,9 +71,4 @@ int main(int argc, char *argv[])
     //Close opened file and svx file
     fclose(topfile);
     fclose(svxfile);
-
-
-
-
-
 }
