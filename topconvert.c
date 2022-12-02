@@ -36,14 +36,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    char c;
-
-    while(fread(&c, sizeof(char), 1, topfile))
+    char line[1024];
+    for(int i = 0; i < 5; i++)
     {
-        fwrite(&c, sizeof(char), 1, svxfile);
+        fgets(line, 1024, topfile);
+        fputs(line, svxfile);
     }
 
-
+    for(int i = 0; i < 5; i++)
+    {
+        fgets(line, 1024, topfile);
+        fputs(line, svxfile);
+    }
 
 
 
