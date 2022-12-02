@@ -9,6 +9,16 @@ Read pockettopo txt export and write survex file
 #define _GNU_SOURCE
 #include <string.h>
 
+typedef struct shot
+{
+    char fromstation[9];
+    char tostation[9];
+    char tape[9];
+    char compass[9];
+    char clino[9];
+    char comment[257];
+}shot;
+
 int main(int argc, char *argv[])
 {
     //Open file -> location == argc
