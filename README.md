@@ -1,3 +1,8 @@
 # topconvert
 
-txt to survex file converter - need a comments.
+Pockettopo exposrt txt to survex file converter.
+
+TODO:
+*add argc
+*average the shots
+*add date, team etc funcionality
