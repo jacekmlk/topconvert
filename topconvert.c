@@ -1,7 +1,6 @@
-/*
-## TOPOCONVERT ##
-Read pockettopo txt export and write survex file
-*/
+/* ## TOPOCONVERT ## */
+/*Read pockettopo txt export and write survex file */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,43 +48,38 @@ int main(int argc, char *argv[])
 
     fpos_t position;
 	char name[257];
+	char lenght[12];
+	char numteam[9];
+	char snum[9];
+	char date[12];
+	char declination[9];
+	char team[257];
+	
 
-	if(fgets(line, 1024, topfile) != NULL)
-	{
-		int i = 0;
-		while(line[i] != ' ')
-		{
-			name[i] = line[i];
-			i++;
-		}
-	name[i] = '\0';
-	}
-	else
-	{
-        printf("ERROR!");
-		return 1;
-	}
+	fscanf(topfile, "%256s %11s %8s %8s %11s %8s", name, lenght, numteam, snum, date, declination);
+	fgets(team, 256, topfile);
 
-	fputs("*begin\n*title ", svxfile);
+	fputs("*begin", svxfile);
+	fputs("\n*name\t", svxfile);
 	fputs(name, svxfile);
-	fputs("\n*date\n", svxfile);
-	fputs("*team\n", svxfile);
+	fputs("\n*date\t", svxfile);
+	fputs(date, svxfile);
+	fputs("\n*team\t", svxfile);
+	fputs(team, svxfile);
+	fputc('\n', svxfile);
 
-    while(fgets(line, 1024, topfile) != NULL && !(d1 == 1 && d2 == 1))
+    while(!(d1 == 1 && d2 == 1))
     {
+		fgets(line, 1024, topfile);
         d1 = d2;
         d2 = strlen(line);
-        fputs(line, svxfile);
-        fgetpos(topfile, &position);
     }
-
-    //Go back one line
-    fsetpos(topfile, &position);
 
 	//Check amount of lines in file
 	int linecount = 1;
 	char c;
 
+	fgetpos(topfile, &position);
 	for (c = fgetc(topfile); c != EOF; c = fgetc(topfile))
 	{
 		if (c == '\n')
@@ -101,7 +95,7 @@ int main(int argc, char *argv[])
 	shot splay[linecount];
 	int splaycount = 0;
 
-	fputs("*data normal from to compass clino tape\n", svxfile);
+	fputs("\n*data normal from to compass clino tape\n", svxfile);
 
     while(fgets(line, 1024, topfile) != NULL)
     {
