@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
 
 	fputs("\n*data normal from to compass clino tape\n", svxfile);
 
+	//Write simpler version of code below using fscanf
+
     while(fgets(line, 1024, topfile) != NULL)
     {
         //Write into shot struct
