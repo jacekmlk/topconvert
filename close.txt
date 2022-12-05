@@ -1,8 +1,7 @@
 *begin
 *name	221112czarna_lukowa_dootworu
-*date	2022/11/12
+*date	2022.11.12
 *team	  "Jacek i Dima\r"
-
 
 *data normal from to compass clino tape
 1_0	1_1	9.030	284.17	-5.72

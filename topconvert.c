@@ -1,11 +1,9 @@
 /* ## TOPOCONVERT ## */
 /*Read pockettopo txt export and write survex file */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdbool.h>
 
 typedef struct shot
 {
@@ -43,10 +41,8 @@ int main(int argc, char *argv[])
     line = malloc(sizeof(char) * 1024);
 
     // Read and write header
-    int d1;
-    int d2;
 
-    fpos_t position;
+
 	char name[257];
 	char lenght[12];
 	char numteam[9];
@@ -60,22 +56,37 @@ int main(int argc, char *argv[])
 	fgets(team, 256, topfile);
 
 	fputs("*begin", svxfile);
-	fputs("\n*name\t", svxfile);
+	fputs("\n*name\t",svxfile);
 	fputs(name, svxfile);
 	fputs("\n*date\t", svxfile);
+
+	//Date: change '/' into dot.
+	int index = 0;
+	while(date[index] != '\0')
+	{	
+		if (date[index] == '/')
+		{
+			date[index] = '.';
+		}
+		index++;
+	}
+
 	fputs(date, svxfile);
 	fputs("\n*team\t", svxfile);
 	fputs(team, svxfile);
-	fputc('\n', svxfile);
 
-    while(!(d1 == 1 && d2 == 1))
+	//Detect end of the header
+    char d1;
+    char d2;
+    while(!(d1 == '\n' && d2 == '\n'))
     {
-		fgets(line, 1024, topfile);
+		char c = fgetc(topfile);
         d1 = d2;
-        d2 = strlen(line);
+        d2 = c;
     }
 
 	//Check amount of lines in file
+    fpos_t position;
 	int linecount = 1;
 	char c;
 
@@ -88,8 +99,6 @@ int main(int argc, char *argv[])
 		}
 	}
     fsetpos(topfile, &position);
-
-
 
     shot measure;
 	shot splay[linecount];
@@ -107,6 +116,7 @@ int main(int argc, char *argv[])
 		medit(measure.tape, line, 24, 32);
 		medit(measure.compass, line, 32, 40);
 		medit(measure.clino, line, 40, 48);
+
 		if (strlen(line) > 58)
 		{
 			commedit(measure.comment, line, 57);
