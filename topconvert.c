@@ -5,19 +5,25 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define LENSTAT 8 //Lenght of station string
+#define LENCOMM 256 // Lenght of comment string
+#define LENTAB 4 // Lenght of tab
+
 typedef struct shot
 {
-    char fromstation[9];
-    char tostation[9];
-    char tape[9];
-    char compass[9];
-    char clino[9];
-    char comment[258];
+    char from[LENSTAT + 1];
+    char to[LENSTAT + 1];
+    float tape ;
+    float compass;
+    float clino;
+    char comment[LENCOMM + 1];
 } shot;
 
-void statedit(char *station, char *word, int from, int to);
+void trailspace(char *station);
+void statedit(char *station);
 void medit(char *measure, char *word, int from, int to);
 void commedit(char *comment, char *word, int from);
+void clean(char *str);
 
 int main(int argc, char *argv[])
 {
@@ -37,19 +43,16 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    char *line; // temporary line buffer
-    line = malloc(sizeof(char) * 1024);
+
 
     // Read and write header
-
-
-	char name[257];
+	char name[LENCOMM + 1];
 	char lenght[12];
-	char numteam[9];
-	char snum[9];
-	char date[12];
-	char declination[9];
-	char team[257];
+	char numteam[LENSTAT + 1];
+	char snum[LENSTAT + 1];
+	char date[13];
+	char declination[LENSTAT + 1];
+	char team[LENCOMM + 1];
 	
 
 	fscanf(topfile, "%256s %11s %8s %8s %11s %8s", name, lenght, numteam, snum, date, declination);
@@ -73,6 +76,7 @@ int main(int argc, char *argv[])
 
 	fputs(date, svxfile);
 	fputs("\n*team\t", svxfile);
+	trailspace(team);
 	fputs(team, svxfile);
 
 	//Detect end of the header
@@ -100,20 +104,47 @@ int main(int argc, char *argv[])
 	}
     fsetpos(topfile, &position);
 
-    shot measure;
+	shot measure;
 	shot splay[linecount];
 	int splaycount = 0;
 
-	fputs("\n*data normal from to compass clino tape\n", svxfile);
+	fputs("\n*data normal from to tape compass clino\n", svxfile);
 
 	//Write simpler version of code below using fscanf
 
+	while(feof(topfile) == 0)
+	{
+		fseek(topfile, LENTAB, SEEK_CUR);
+		//Read stations
+		fread(&measure.from, sizeof(char), LENSTAT, topfile);
+		measure.from[LENSTAT] = '\0';
+		fseek(topfile, 2, SEEK_CUR);
+		fread(&measure.to, sizeof(char), LENSTAT, topfile);
+		measure.to[LENSTAT] = '\0';
+		fseek(topfile, 2, SEEK_CUR);
+	
+		fscanf(topfile, "%f %f %f", &measure.tape, &measure.compass, &measure.clino);
+
+		//Read comment
+		fgets(measure.comment, 256, topfile);
+		trailspace(measure.comment);
+
+		//Process
+		statedit(measure.from);
+		statedit(measure.to);
+
+		printf("%s\t%s\t%.3f\t%.2f\t%.2f\t%s\n", measure.from, measure.to, measure.tape, measure.compass, measure.clino, measure.comment);
+
+		clean(measure.to);
+	}
+
+	/*
     while(fgets(line, 1024, topfile) != NULL)
     {
         //Write into shot struct
 
-		statedit(measure.fromstation, line, 0, 8);
-		statedit(measure.tostation, line, 12, 20);
+		statedit(measure.from, line, 0, 8);
+		statedit(measure.to, line, 12, 20);
 
 		medit(measure.tape, line, 24, 32);
 		medit(measure.compass, line, 32, 40);
@@ -125,11 +156,11 @@ int main(int argc, char *argv[])
 		}
 
 		//Put path into file
-		if(strcmp(measure.tostation, "\0") != 0)
+		if(strcmp(measure.to, "\0") != 0)
 		{
-			fputs(measure.fromstation, svxfile);
+			fputs(measure.from, svxfile);
 			fputc('\t', svxfile);
-			fputs(measure.tostation, svxfile);
+			fputs(measure.to, svxfile);
 			fputc('\t', svxfile);
 			fputs(measure.tape, svxfile);
 			fputc('\t', svxfile);
@@ -143,7 +174,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			//Collect splays
-			strcpy(splay[splaycount].fromstation, measure.fromstation);
+			strcpy(splay[splaycount].fromstation, measure.from);
 			strcpy(splay[splaycount].tape, measure.tape);
 			strcpy(splay[splaycount].compass, measure.compass);
 			strcpy(splay[splaycount].clino, measure.clino);
@@ -170,36 +201,53 @@ int main(int argc, char *argv[])
 			fputs("\n", svxfile);
 	}
 	fputs("*end", svxfile);
-
-    free(line);
+	*/
     fclose(topfile);
     fclose(svxfile);
 }
 
-//Station edit function
-void statedit(char *station, char *word, int from, int to)
+//Remove trailing spaces
+void trailspace(char *station)
 {
 	int c = 0;
-
-	for (int i = from; i < to; i++)
+	for (int i = 0; station[i] != '\0'; i++)
 	{
-		if(word[i] != ' ')
+		if(station[i] != ' ' || c > 0)
 		{
-			if(word[i] == '.') //change dot into '_'
-			{
-				station[c] = '_'; 
-				c++;
-			}
-			else
-			{
-				station[c] = word[i];
-				c++;
-			}
+			station[c] = station[i];
+			c++;
 		}
 
 	}
 	station[c] = '\0';
 }
+
+
+//Station edit function
+void statedit(char *station)
+{
+	for( int i = 0; station[i] != '\0'; i++)
+	{
+		if(station[i] == '.')
+		{
+			station[i] = '_';
+		}
+	}
+
+	int c = 0;
+	for (int i = 0; station[i] != '\0'; i++)
+	{
+		if(station[i] != ' ')
+		{
+			station[c] = station[i];
+			c++;
+		}
+
+	}
+	station[c] = '\0';
+}
+
+
 
 //Measure edit function
 void medit(char *measure, char *word, int from, int to)
@@ -234,6 +282,19 @@ void commedit(char *comment, char *word, int from)
 		{
 			comment[c] = word[i];
 			c++;
+		}
+	}
+
+}
+
+void clean(char *str)
+{
+	int i = 0;
+	{
+		while(str[i] != '\0')
+		{
+			str[i] = '\0';
+			i++;
 		}
 	}
 
