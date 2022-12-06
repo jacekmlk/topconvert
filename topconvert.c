@@ -22,7 +22,6 @@ typedef struct shot
 void trailspace(char *station);
 void statedit(char *station);
 void medit(char *measure, char *word, int from, int to);
-void commedit(char *comment, char *word, int from);
 void clean(char *str);
 
 int main(int argc, char *argv[])
@@ -104,8 +103,14 @@ int main(int argc, char *argv[])
 	}
     fsetpos(topfile, &position);
 
-	shot measure;
-	shot splay[linecount];
+	shot *ptrshot = malloc(sizeof(shot));
+	if(ptrshot == NULL)
+	{
+		return 1;
+	}
+
+
+	shot *ptrsplay[linecount];
 	int splaycount = 0;
 
 	fputs("\n*data normal from to tape compass clino\n", svxfile);
@@ -116,27 +121,49 @@ int main(int argc, char *argv[])
 	{
 		fseek(topfile, LENTAB, SEEK_CUR);
 		//Read stations
-		fread(&measure.from, sizeof(char), LENSTAT, topfile);
-		measure.from[LENSTAT] = '\0';
+		fread(&ptrshot->from, sizeof(char), LENSTAT, topfile);
+		ptrshot->from[LENSTAT] = '\0';
 		fseek(topfile, 2, SEEK_CUR);
-		fread(&measure.to, sizeof(char), LENSTAT, topfile);
-		measure.to[LENSTAT] = '\0';
+		fread(&ptrshot->to, sizeof(char), LENSTAT, topfile);
+		ptrshot->to[LENSTAT] = '\0';
 		fseek(topfile, 2, SEEK_CUR);
 	
-		fscanf(topfile, "%f %f %f", &measure.tape, &measure.compass, &measure.clino);
+		fscanf(topfile, "%f %f %f", &ptrshot->tape, &ptrshot->compass, &ptrshot->clino);
 
 		//Read comment
-		fgets(measure.comment, 256, topfile);
-		trailspace(measure.comment);
+		fgets(ptrshot->comment, 256, topfile);
+		trailspace(ptrshot->comment);
 
 		//Process
-		statedit(measure.from);
-		statedit(measure.to);
+		statedit(ptrshot->from);
+		statedit(ptrshot->to);
 
-		printf("%s\t%s\t%.3f\t%.2f\t%.2f\t%s\n", measure.from, measure.to, measure.tape, measure.compass, measure.clino, measure.comment);
+		//Put shots into file
 
-		clean(measure.to);
+		// 1. Main shots
+		if(ptrshot->to[0] !='\0')
+		{
+
+			fprintf(svxfile, "%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrshot->from, ptrshot->to, ptrshot->tape, ptrshot->compass, ptrshot->clino, ptrshot->comment);
+		}
+		else
+		{
+			//Collect splays
+			ptrsplay[splaycount] = ptrshot;
+			splaycount++;
+
+			ptrshot = NULL;
+			ptrshot = malloc(sizeof(shot));
+		}
 	}
+
+	//Put splays into file
+	fputs("*flags splay\n", svxfile);
+	for(int i = 0; i < splaycount; i++)
+	{
+		fprintf(svxfile, "%s\t\t\t%.3f\t%.2f\t%.2f\t; %s\n", ptrsplay[i]->from, ptrsplay[i]->tape, ptrsplay[i]->compass, ptrsplay[i]->clino, ptrsplay[i]->comment);
+	}
+	fputs("*end", svxfile);
 
 	/*
     while(fgets(line, 1024, topfile) != NULL)
@@ -202,6 +229,13 @@ int main(int argc, char *argv[])
 	}
 	fputs("*end", svxfile);
 	*/
+
+	free(ptrshot);
+	for(int i = 0; i < splaycount; i++)
+	{
+		free(ptrsplay[i]);
+	}
+
     fclose(topfile);
     fclose(svxfile);
 }
@@ -221,7 +255,6 @@ void trailspace(char *station)
 	}
 	station[c] = '\0';
 }
-
 
 //Station edit function
 void statedit(char *station)
@@ -245,46 +278,6 @@ void statedit(char *station)
 
 	}
 	station[c] = '\0';
-}
-
-
-
-//Measure edit function
-void medit(char *measure, char *word, int from, int to)
-{
-	int c = 0;
-
-	for (int i = from; i < to; i++)
-	{
-		if(word[i] != ' ')
-		{
-			measure[c] = word[i];
-			c++;
-		}
-
-	}
-	measure[c] = '\0';
-}
-
-//Comment edit function
-void commedit(char *comment, char *word, int from)
-{
-	comment[0] = ';';
-	int c = 1;
-	for (int i = from; i < strlen(word); i++)
-	{
-		if (word[i] == '\n')
-		{
-			comment[c] = '\0';
-			c++;
-		}
-		else if (word[i] != '"') // remove ""
-		{
-			comment[c] = word[i];
-			c++;
-		}
-	}
-
 }
 
 void clean(char *str)
