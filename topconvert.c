@@ -1,9 +1,9 @@
 /* ## TOPOCONVERT ## */
 /*Read pockettopo txt export and write survex file */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #define LENSTAT 8 //Lenght of station string
 #define LENCOMM 256 // Lenght of comment string
@@ -22,7 +22,6 @@ typedef struct shot
 void trailspace(char *station);
 void afterspace(char *word);
 void statedit(char *station);
-void clean(char *str);
 
 int main(int argc, char *argv[])
 {
@@ -42,17 +41,14 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-
-
     // Read and write header
 	char name[LENCOMM + 1];
-	char lenght[12];
+	char lenght[13];
 	char numteam[LENSTAT + 1];
 	char snum[LENSTAT + 1];
 	char date[13];
 	char declination[LENSTAT + 1];
 	char team[LENCOMM + 1];
-	
 	
 	fscanf(topfile, "%256s %11s %8s %8s %11s %8s", name, lenght, numteam, snum, date, declination);
 
