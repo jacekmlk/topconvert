@@ -13,7 +13,7 @@ typedef struct shot
 {
     char from[LENSTAT + 1];
     char to[LENSTAT + 1];
-    float tape ;
+    float tape;
     float compass;
     float clino;
     char comment[LENCOMM + 1];
@@ -38,9 +38,25 @@ int main(int argc, char *argv[])
         printf("ERROR! Usage: ./topconvert file.txt\n");
         return 1;
     }
+    char namefile[LENCOMM + 1];
+    strcpy(namefile, argv[1]);
+
+    char *postxt = strstr(namefile, "txt");
+    if(postxt == NULL)
+    {
+        printf("ERROR! Usage: ./topconvert file.txt\n");
+        return 1;
+    }
+
+    char *str = "svx";
+    for (int i = 0; postxt[i] != '\0'; i++)
+    {
+        postxt[i] = str[i];
+    }
+
 
     //Open svx file to write
-    FILE *svxfile = fopen("close.txt", "w");
+    FILE *svxfile = fopen(namefile, "w");
     if (svxfile == NULL)
     {
         printf("ERROR!");
