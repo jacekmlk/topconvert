@@ -25,11 +25,17 @@ void statedit(char *station);
 
 int main(int argc, char *argv[])
 {
+	if(argc != 2)
+	{
+		printf("ERROR! Usage: ./topconvert file.txt\n");
+		return 1;
+	}
+
     //Open file -> location == argc
-    FILE *topfile = fopen("test.txt", "r");
+    FILE *topfile = fopen(argv[1], "r");
     if (topfile == NULL)
     {
-        printf("ERROR!");
+        printf("ERROR! Usage: ./topconvert file.txt\n");
         return 1;
     }
 
