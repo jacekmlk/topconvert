@@ -54,7 +54,6 @@ int main(int argc, char *argv[])
         postxt[i] = str[i];
     }
 
-
     //Open svx file to write
     FILE *svxfile = fopen(namefile, "w");
     if (svxfile == NULL)
@@ -89,12 +88,6 @@ int main(int argc, char *argv[])
 		team[j+i] = tempteam[j];
 		j++;
 	}
-	tempteam[j] = '\0';
-
-	fputs("*begin", svxfile);
-	fputs("\n*name\t",svxfile);
-	fputs(name, svxfile);
-	fputs("\n*date\t", svxfile);
 
 	//Date: change '/' into dot.
 	int index = 0;
@@ -107,10 +100,10 @@ int main(int argc, char *argv[])
 		index++;
 	}
 
-	fputs(date, svxfile);
-	fputs("\n*team\t", svxfile);
 	trailspace(team);
-	fputs(team, svxfile);
+
+	//Print header
+	fprintf(svxfile, "*begin\n*name\t%s\n*date\t%s\n*team\t%s; Declination: %s\n", name, date, team, declination);
 
 	//Detect end of the header
     char d1;
@@ -143,7 +136,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-
+	shot *ptrleg[3];
+	int legcount = 0;
 	shot *ptrsplay[linecount];
 	int splaycount = 0;
 
@@ -175,11 +169,31 @@ int main(int argc, char *argv[])
 
 		//Put shots into file
 
-		// 1. Main shots
+		// 1. Legs
 		if(ptrshot->to[0] !='\0')
 		{
+			if(legcount == 0)
+			{
+				ptrleg[legcount] = ptrshot;
+				ptrshot = NULL;
+				legcount++;
+			}
+			else
+			{
+				if(strcmp(ptrleg[legcount - 1]->from, ptrshot->from) != 0 || strcmp(ptrleg[legcount - 1]->to, ptrshot->to) != 0)
+				{	//Average and printf ptrlegs
+					//Free ptrlegs allocated memory
+					//printf ptrshot
+				}
+				else
+				{
+					ptrleg[legcount] = ptrshot;
+					ptrshot = NULL;
+					legcount++;
+				}
 
-			fprintf(svxfile, "%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrshot->from, ptrshot->to, ptrshot->tape, ptrshot->compass, ptrshot->clino, ptrshot->comment);
+			}
+			// fprintf(svxfile, "%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrshot->from, ptrshot->to, ptrshot->tape, ptrshot->compass, ptrshot->clino, ptrshot->comment);
 		}
 		else
 		{
@@ -273,3 +287,5 @@ void statedit(char *station)
 	}
 	station[c] = '\0';
 }
+
+//Averange
