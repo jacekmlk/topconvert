@@ -19,9 +19,11 @@ typedef struct shot
     char comment[LENCOMM + 1];
 } shot;
 
+
 void trailspace(char *station);
 void afterspace(char *word);
 void statedit(char *station);
+float average(float *measure, int count);
 
 int main(int argc, char *argv[])
 {
@@ -182,8 +184,15 @@ int main(int argc, char *argv[])
 			{
 				if(strcmp(ptrleg[legcount - 1]->from, ptrshot->from) != 0 || strcmp(ptrleg[legcount - 1]->to, ptrshot->to) != 0)
 				{	//Average and printf ptrlegs
+
+
 					//Free ptrlegs allocated memory
-					//printf ptrshot
+					legcount = 0;
+
+					//ptrshot into legcount
+					ptrleg[legcount] = ptrshot;
+					ptrshot = NULL;
+					legcount++;
 				}
 				else
 				{
@@ -288,4 +297,15 @@ void statedit(char *station)
 	station[c] = '\0';
 }
 
-//Averange
+//Average
+
+float average(float *measure, int count)
+{	
+	float sum = 0;
+	for(int i = 0; i < count; i++)
+	{
+		sum = sum + measure[count];
+	}
+
+	return sum/count;
+}
