@@ -138,8 +138,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	shot *ptrleg[3];
+	shot *ptrleg[linecount];
 	int legcount = 0;
+	int maxlegcount = 0;
 	shot *ptrsplay[linecount];
 	int splaycount = 0;
 
@@ -174,35 +175,27 @@ int main(int argc, char *argv[])
 		// 1. Legs
 		if(ptrshot->to[0] !='\0')
 		{
-			if(legcount == 0)
-			{
-				ptrleg[legcount] = ptrshot;
-				ptrshot = NULL;
-				legcount++;
-			}
-			else
+			if(legcount != 0)
 			{
 				if(strcmp(ptrleg[legcount - 1]->from, ptrshot->from) != 0 || strcmp(ptrleg[legcount - 1]->to, ptrshot->to) != 0)
-				{	//Average and printf ptrlegs
+				{	
+					fprintf(svxfile,"%s\n", average(ptrleg->from, legcount - 1));
 
-
-					//Free ptrlegs allocated memory
 					legcount = 0;
-
-					//ptrshot into legcount
-					ptrleg[legcount] = ptrshot;
-					ptrshot = NULL;
-					legcount++;
 				}
-				else
-				{
-					ptrleg[legcount] = ptrshot;
-					ptrshot = NULL;
-					legcount++;
-				}
-
 			}
-			// fprintf(svxfile, "%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrshot->from, ptrshot->to, ptrshot->tape, ptrshot->compass, ptrshot->clino, ptrshot->comment);
+			ptrleg[legcount] = ptrshot;
+			legcount++;
+
+			if(legcount > maxlegcount)
+			{
+				maxlegcount = legcount;
+			}
+
+			ptrshot = NULL;
+			ptrshot = malloc(sizeof(shot));
+			
+			fprintf(svxfile, "%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrshot->from, ptrshot->to, ptrshot->tape, ptrshot->compass, ptrshot->clino, ptrshot->comment);
 		}
 		else
 		{
@@ -230,10 +223,15 @@ int main(int argc, char *argv[])
 		free(ptrsplay[i]);
 	}
 
+	for(int i = 0; i < maxlegcount; i++)
+	{
+		free(ptrleg[i]);
+	}
+
 	//Close files
     fclose(topfile);
     fclose(svxfile);
-}
+	}
 
 //Remove trailing spaces
 void trailspace(char *station)
@@ -299,7 +297,7 @@ void statedit(char *station)
 
 //Average
 
-float average(float *measure, int count)
+float average(shot *measure, int count)
 {	
 	float sum = 0;
 	for(int i = 0; i < count; i++)
