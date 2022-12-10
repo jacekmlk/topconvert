@@ -23,7 +23,6 @@ typedef struct shot
 void trailspace(char *station);
 void afterspace(char *word);
 void statedit(char *station);
-float average(float *measure, int count);
 
 int main(int argc, char *argv[])
 {
@@ -140,13 +139,11 @@ int main(int argc, char *argv[])
 
 	shot *ptrleg[linecount];
 	int legcount = 0;
-	int maxlegcount = 0;
 	shot *ptrsplay[linecount];
 	int splaycount = 0;
 
 	fputs("\n*data normal from to tape compass clino\n", svxfile);
 
-	//Write simpler version of code below using fscanf
 
 	while(feof(topfile) == 0)
 	{
@@ -175,37 +172,73 @@ int main(int argc, char *argv[])
 		// 1. Legs
 		if(ptrshot->to[0] !='\0')
 		{
-			if(legcount != 0)
-			{
-				if(strcmp(ptrleg[legcount - 1]->from, ptrshot->from) != 0 || strcmp(ptrleg[legcount - 1]->to, ptrshot->to) != 0)
-				{	
-					fprintf(svxfile,"%s\n", average(ptrleg->from, legcount - 1));
-
-					legcount = 0;
-				}
-			}
+			//Collect legs
 			ptrleg[legcount] = ptrshot;
 			legcount++;
 
-			if(legcount > maxlegcount)
-			{
-				maxlegcount = legcount;
-			}
-
 			ptrshot = NULL;
 			ptrshot = malloc(sizeof(shot));
-			
-			fprintf(svxfile, "%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrshot->from, ptrshot->to, ptrshot->tape, ptrshot->compass, ptrshot->clino, ptrshot->comment);
 		}
 		else
 		{
-			//Collect splays
-			ptrsplay[splaycount] = ptrshot;
-			splaycount++;
+			if(ptrshot->tape == 0 && ptrshot->compass == 0 && ptrshot->clino == 0)
+			{
+				fprintf(svxfile,"\t; %s\t%s\n", ptrshot->from, ptrshot->comment);
+			}
+			else
+			{
+				//Collect splays
+				ptrsplay[splaycount] = ptrshot;
+				splaycount++;
 
-			ptrshot = NULL;
-			ptrshot = malloc(sizeof(shot));
+				ptrshot = NULL;
+				ptrshot = malloc(sizeof(shot));
+			}
 		}
+	}
+	int count = 0;
+	float sumtape = 0;
+	float sumcompass = 0;
+	float sumclino = 0;
+	char comment[LENCOMM + 1];
+
+	//Process legs and put into file
+	for(int i = 0; i < legcount; i++)
+	{
+		//Print as comment to check
+		fprintf(svxfile, "\t; %s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, ptrleg[i]->tape, ptrleg[i]->compass, ptrleg[i]->clino, ptrleg[i]->comment);
+
+		sumtape = sumtape + ptrleg[i]->tape;
+		sumcompass = sumcompass + ptrleg[i]->compass;
+		sumclino = sumclino + ptrleg[i]->clino;
+		strcat(comment, ptrleg[i]->comment);
+
+		count++;
+
+
+		if(i < legcount - 1)
+		{
+			if(strcmp(ptrleg[i]->from, ptrleg[i+1]->from) != 0 || strcmp(ptrleg[i]->to, ptrleg[i+1]->to) != 0)
+			{
+				fprintf(svxfile, "\n%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, (sumtape / count), (sumcompass / count), (sumclino / count), comment);
+				sumtape = 0;
+				sumcompass = 0;
+				sumclino = 0;
+				comment[0] = '\0';
+				count = 0;
+			}
+		}
+		else
+		{
+			fprintf(svxfile, "\n%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, (sumtape / count), (sumcompass / count), (sumclino / count), comment);
+			for (int j = i - count; j < i; j++)
+			sumtape = 0;
+			sumcompass = 0;
+			sumclino = 0;
+			comment[0] = '\0';
+			count = 0;
+		}
+
 	}
 
 	//Put splays into file
@@ -222,8 +255,7 @@ int main(int argc, char *argv[])
 	{
 		free(ptrsplay[i]);
 	}
-
-	for(int i = 0; i < maxlegcount; i++)
+	for(int i = 0; i < legcount; i++)
 	{
 		free(ptrleg[i]);
 	}
@@ -293,17 +325,4 @@ void statedit(char *station)
 
 	}
 	station[c] = '\0';
-}
-
-//Average
-
-float average(shot *measure, int count)
-{	
-	float sum = 0;
-	for(int i = 0; i < count; i++)
-	{
-		sum = sum + measure[count];
-	}
-
-	return sum/count;
 }
