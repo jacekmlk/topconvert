@@ -179,6 +179,12 @@ int main(int argc, char *argv[])
 
 			ptrshot = NULL;
 			ptrshot = malloc(sizeof(shot));
+			
+			if(ptrshot == NULL)
+			{
+				printf("ERROR!");
+				return 1;
+			}
 		}
 		else
 		{
@@ -194,6 +200,12 @@ int main(int argc, char *argv[])
 
 				ptrshot = NULL;
 				ptrshot = malloc(sizeof(shot));
+
+				if(ptrshot == NULL)
+				{
+					printf("ERROR!");
+					return 1;
+				}
 			}
 		}
 	}
