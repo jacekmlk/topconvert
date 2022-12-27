@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
 	trailspace(team);
 
-	//Print header
+	//Print header and add CRLF handle
 	fprintf(svxfile, "*begin\n*name\t%s\n*date\t%s\n*team\t%s; Declination: %s\n", name, date, team, declination);
 
 	//Detect end of the header - Make version of CRLF
@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
 	int linecount = 1;
 	char c;
 
+	//and add CRLF handling
 	fgetpos(topfile, &position);
 	for (c = fgetc(topfile); c != EOF; c = fgetc(topfile))
 	{
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
 
 			ptrshot = NULL;
 			ptrshot = malloc(sizeof(shot));
-			
+
 			if(ptrshot == NULL)
 			{
 				printf("ERROR!");
@@ -219,7 +220,7 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < legcount; i++)
 	{
 		//Print as comment to check
-		fprintf(svxfile, "\t; %s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, ptrleg[i]->tape, ptrleg[i]->compass, ptrleg[i]->clino, ptrleg[i]->comment);
+		fprintf(svxfile, "\n\t; %s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, ptrleg[i]->tape, ptrleg[i]->compass, ptrleg[i]->clino, ptrleg[i]->comment);
 
 		sumtape = sumtape + ptrleg[i]->tape;
 		sumcompass = sumcompass + ptrleg[i]->compass;
