@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 	//Print header
 	fprintf(svxfile, "*begin\n*name\t%s\n*date\t%s\n*team\t%s; Declination: %s\n", name, date, team, declination);
 
-	//Detect end of the header
+	//Detect end of the header - Make version of CRLF
     char d1;
     char d2;
     while(!(d1 == '\n' && d2 == '\n'))
@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
 	shot *ptrshot = malloc(sizeof(shot));
 	if(ptrshot == NULL)
 	{
+        printf("ERROR!");
 		return 1;
 	}
 
