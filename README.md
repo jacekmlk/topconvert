@@ -4,5 +4,5 @@ Pockettopo export txt to survex file converter.
 
 TODO:
 -add second team funcionality
--add error handling and garbage collector
+-add garbage collector as function
 -add windows version (CRLF)
