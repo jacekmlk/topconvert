@@ -72,8 +72,9 @@ int main(int argc, char *argv[])
 	char declination[LENSTAT + 1];
 	char team[LENCOMM + 1];
 	
-	fscanf(topfile, "%256s %11s %8s %8s %11s %8s", name, lenght, numteam, snum, date, declination);
+	fscanf(topfile, "%256s %11s %8s %8s %11s %256s", name, lenght, numteam, snum, date, declination);
 
+	//Read team
 	char tempteam[LENCOMM + 1];
 	fgets(tempteam, LENCOMM, topfile);
 
@@ -103,29 +104,30 @@ int main(int argc, char *argv[])
 
 	trailspace(team);
 
-	//Print header and add CRLF handle
-	fprintf(svxfile, "*begin\n*name\t%s\n*date\t%s\n*team\t%s; Declination: %s\n", name, date, team, declination);
+	//Print header
+	fprintf(svxfile, "*begin\r\n;name\t%s\r\n*date\t%s\r\n*team\t%s;Declination: %s\r\n", name, date, team, declination);
 
-	//Detect end of the header - Make version of CRLF
+	//Detect end of the header
     char d1;
     char d2;
-    while(!(d1 == '\n' && d2 == '\n'))
+	char c[LENCOMM + 1];
+    while(!((d1 == '\n' || d1 == '\r') && (d2 == '\n' || d1 == '\r')))
     {
-		char c = fgetc(topfile);
+		fgets(c, LENCOMM, topfile);
         d1 = d2;
-        d2 = c;
+        d2 = c[0];
     }
 
 	//Check amount of lines in file
     fpos_t position;
 	int linecount = 1;
-	char c;
+	char d;
 
-	//and add CRLF handling
+	//Counting number of lines
 	fgetpos(topfile, &position);
-	for (c = fgetc(topfile); c != EOF; c = fgetc(topfile))
+	for (d = fgetc(topfile); d != EOF; d = fgetc(topfile))
 	{
-		if (c == '\n')
+		if (d == '\n')
 		{
 			linecount++;
 		}
@@ -144,7 +146,7 @@ int main(int argc, char *argv[])
 	shot *ptrsplay[linecount];
 	int splaycount = 0;
 
-	fputs("\n*data normal from to tape compass clino\n", svxfile);
+	fputs("\r\n*data normal from to tape compass clino\r\n", svxfile);
 
 
 	while(feof(topfile) == 0)
@@ -161,7 +163,7 @@ int main(int argc, char *argv[])
 		fscanf(topfile, "%f %f %f", &ptrshot->tape, &ptrshot->compass, &ptrshot->clino);
 
 		//Read comment
-		fgets(ptrshot->comment, 256, topfile);
+		fgets(ptrshot->comment, LENCOMM, topfile);
 		trailspace(ptrshot->comment);
 		afterspace(ptrshot->comment);
 
@@ -191,7 +193,7 @@ int main(int argc, char *argv[])
 		{
 			if(ptrshot->tape == 0 && ptrshot->compass == 0 && ptrshot->clino == 0)
 			{
-				fprintf(svxfile,"\t; %s\t%s\n", ptrshot->from, ptrshot->comment);
+				fprintf(svxfile,"\t; %s\t%s\r\n", ptrshot->from, ptrshot->comment);
 			}
 			else
 			{
@@ -220,7 +222,7 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < legcount; i++)
 	{
 		//Print as comment to check
-		fprintf(svxfile, "\n\t; %s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, ptrleg[i]->tape, ptrleg[i]->compass, ptrleg[i]->clino, ptrleg[i]->comment);
+		fprintf(svxfile, "\t;%s\t%s\t%.3f\t%.2f\t%.2f\t%s\r\n", ptrleg[i]->from, ptrleg[i]->to, ptrleg[i]->tape, ptrleg[i]->compass, ptrleg[i]->clino, ptrleg[i]->comment);
 
 		sumtape = sumtape + ptrleg[i]->tape;
 		sumcompass = sumcompass + ptrleg[i]->compass;
@@ -234,7 +236,7 @@ int main(int argc, char *argv[])
 		{
 			if(strcmp(ptrleg[i]->from, ptrleg[i+1]->from) != 0 || strcmp(ptrleg[i]->to, ptrleg[i+1]->to) != 0)
 			{
-				fprintf(svxfile, "\n%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, (sumtape / count), (sumcompass / count), (sumclino / count), comment);
+				fprintf(svxfile, "%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\r\n\r\n", ptrleg[i]->from, ptrleg[i]->to, (sumtape / count), (sumcompass / count), (sumclino / count), comment);
 				sumtape = 0;
 				sumcompass = 0;
 				sumclino = 0;
@@ -244,7 +246,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			fprintf(svxfile, "\n%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\n", ptrleg[i]->from, ptrleg[i]->to, (sumtape / count), (sumcompass / count), (sumclino / count), comment);
+			fprintf(svxfile, "\r\n%s\t%s\t%.3f\t%.2f\t%.2f\t; %s\r\n", ptrleg[i]->from, ptrleg[i]->to, (sumtape / count), (sumcompass / count), (sumclino / count), comment);
 			for (int j = i - count; j < i; j++)
 			sumtape = 0;
 			sumcompass = 0;
@@ -259,7 +261,7 @@ int main(int argc, char *argv[])
 	fputs("\n*flags splay\n", svxfile);
 	for(int i = 0; i < splaycount; i++)
 	{
-		fprintf(svxfile, "%s\t\t\t%.3f\t%.2f\t%.2f\t; %s\n", ptrsplay[i]->from, ptrsplay[i]->tape, ptrsplay[i]->compass, ptrsplay[i]->clino, ptrsplay[i]->comment);
+		fprintf(svxfile, "%s\t\t\t%.3f\t%.2f\t%.2f\t;%s\r\n", ptrsplay[i]->from, ptrsplay[i]->tape, ptrsplay[i]->compass, ptrsplay[i]->clino, ptrsplay[i]->comment);
 	}
 	fputs("*end", svxfile);
 
@@ -300,7 +302,7 @@ void afterspace(char *word)
 {
 	for(int i = 0; word[i] != '\0'; i++)
 	{
-		if(word[i] == '\n')
+		if(word[i] == '\n' || word[i] == '\r')
 		{
 			word[i] = '\0';
 		}
