@@ -1,13 +1,14 @@
 # topconvert
-## PHASE: EARLY BETA
+
+### PHASE: EARLY BETA
 
 Pockettopo export txt to survex file converter.
 
 TODO:
--add second team funcionality
--add error handling and garbage collector
--add windows version (CRLF)
--add splays funcionality
+- add second team funcionality
+- add error handling and garbage collector
+- add windows version (CRLF)
+- add splays funcionality
 
 ## Links
 [Pockettopo](https://paperless.bheeb.ch/PocketTopo13.html)
