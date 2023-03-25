@@ -1,5 +1,5 @@
 # topconvert
-##: EARLY BETA
+## PHASE: EARLY BETA
 
 Pockettopo export txt to survex file converter.
 
