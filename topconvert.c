@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	trailspace(team);
 
 	//Print header
-	fprintf(svxfile, "*begin\n*name\t%s\n*date\t%s\n*team\t%s; Declination: %s\n", name, date, team, declination);
+	fprintf(svxfile, "*begin \t%s\n*date\t%s\n*team\t%s; Declination: %s\n\n", name, date, team, declination);
 
 	//Detect end of the header
     char d1;
@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
 	while(feof(topfile) == 0)
 	{
 		fseek(topfile, LENTAB, SEEK_CUR);
+
 		//Read stations
 		fread(&ptrshot->from, sizeof(char), LENSTAT, topfile);
 		ptrshot->from[LENSTAT] = '\0';
@@ -178,6 +179,7 @@ int main(int argc, char *argv[])
 
 			ptrshot = NULL;
 			ptrshot = malloc(sizeof(shot));
+			//TODO Add error handling on malloc
 		}
 		else
 		{
@@ -193,6 +195,7 @@ int main(int argc, char *argv[])
 
 				ptrshot = NULL;
 				ptrshot = malloc(sizeof(shot));
+				//TODO Add error handling on malloc
 			}
 		}
 	}
@@ -245,9 +248,10 @@ int main(int argc, char *argv[])
 	fputs("\n*flags splay\n", svxfile);
 	for(int i = 0; i < splaycount; i++)
 	{
-		fprintf(svxfile, "%s\t\t\t%.3f\t%.2f\t%.2f\t; %s\n", ptrsplay[i]->from, ptrsplay[i]->tape, ptrsplay[i]->compass, ptrsplay[i]->clino, ptrsplay[i]->comment);
+		fprintf(svxfile, "%s\t%ss%i\t%.3f\t%.2f\t%.2f\t; %s\n", ptrsplay[i]->from, ptrsplay[i]->from, i, ptrsplay[i]->tape, ptrsplay[i]->compass, ptrsplay[i]->clino, ptrsplay[i]->comment);
 	}
-	fputs("*end", svxfile);
+	//Put header
+	fprintf(svxfile, "\n*end %s", name);
 
 	//Free memory
 	free(ptrshot);
