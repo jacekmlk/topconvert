@@ -35,7 +35,7 @@ TODO:
 - [Pockettopo](https://paperless.bheeb.ch/PocketTopo13.html)
 - [Survex](https://survex.com/)
 
-## Discaimer
+## Disclaimer
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) @ jacekmlk
 
 
