@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #define LENSTAT 8 //Lenght of station string
 #define LENCOMM 256 // Lenght of comment string
 #define LENTAB 4 // Lenght of tab
@@ -132,6 +133,7 @@ int main(int argc, char *argv[])
     fsetpos(topfile, &position);
 
 	shot *ptrshot = malloc(sizeof(shot));
+
 	if(ptrshot == NULL)
 	{
         printf("ERROR!");
@@ -180,7 +182,6 @@ int main(int argc, char *argv[])
 
 			ptrshot = NULL;
 			ptrshot = malloc(sizeof(shot));
-			//TODO Add error handling on malloc
 			
 			if(ptrshot == NULL)
 			{
@@ -202,7 +203,12 @@ int main(int argc, char *argv[])
 
 				ptrshot = NULL;
 				ptrshot = malloc(sizeof(shot));
-				//TODO Add error handling on malloc
+
+				if(ptrshot == NULL)
+				{
+					printf("ERROR!");
+					return 1;
+				}
 			}
 		}
 	}
@@ -257,7 +263,8 @@ int main(int argc, char *argv[])
 	{
 		fprintf(svxfile, "%s\t%ss%i\t%.3f\t%.2f\t%.2f\t; %s\n", ptrsplay[i]->from, ptrsplay[i]->from, i, ptrsplay[i]->tape, ptrsplay[i]->compass, ptrsplay[i]->clino, ptrsplay[i]->comment);
 	}
-	//Put header
+
+	//Put footer
 	fprintf(svxfile, "\n*end %s", name);
 
 	//Free memory
@@ -276,6 +283,7 @@ int main(int argc, char *argv[])
     fclose(svxfile);
 	}
 
+
 //Remove trailing spaces
 void trailspace(char *station)
 {
@@ -291,6 +299,7 @@ void trailspace(char *station)
 	}
 	station[c] = '\0';
 }
+
 
 //Remove after space, change \n into \0 
 void afterspace(char *word)
@@ -313,6 +322,7 @@ void afterspace(char *word)
 	}
 	word[pos+1] = '\0';
 }
+
 
 //Station edit function
 void statedit(char *station)
